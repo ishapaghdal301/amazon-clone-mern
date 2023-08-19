@@ -1,6 +1,9 @@
 import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
 
+import {ToastContainer , toast} from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 const SignUp = () => {
   const [udata, setudata] = useState({
     fname: "",
@@ -13,13 +16,51 @@ const SignUp = () => {
   const adddata = (e) => {
     const { name, value } = e.target;
 
-    setudata(()=>{
-      return{
+    setudata(() => {
+      return {
         ...udata,
-        [name]:value
-      }
-    })
+        [name]: value,
+      };
+    });
   };
+
+  const senddata = async (e) => {
+    e.preventDefault();
+    const { fname, email, mobile, password, cpassword } = udata;
+
+    if(fname === ""){
+      toast.warn("please fill first name!",{
+        position: "top-center"
+      });
+    }
+    const res = await fetch("http://localhost:8005/register", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        fname, email, mobile, password, cpassword
+    }),
+    });
+
+    const data = await res.json();
+
+    if (res.status === 422 || !data) {
+      toast.warn("Invalid Details !", {
+          position: "top-center"
+      });
+  } else {
+      setudata({
+          ...udata, fname: "", email: "",
+          mobile: "", password: "", cpassword: ""
+      });
+      toast.success("Registration Successfully done 😃!", {
+          position: "top-center"
+      });
+    // console.log(data);
+  };
+}
+
   return (
     <>
       <section>
@@ -89,7 +130,8 @@ const SignUp = () => {
 
               <button
                 type="submit"
-                onChange={adddata}
+                onClick={senddata}
+                // onChange={adddata}
                 value={udata.fname}
                 className="signin_btn"
               >
@@ -102,6 +144,7 @@ const SignUp = () => {
               </div>
             </form>
           </div>
+          <ToastContainer />
         </div>
       </section>
     </>
