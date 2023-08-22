@@ -3,6 +3,7 @@ const router = new express.Router();
 const Products = require("../models/productSchema");
 const USER = require("../models/userSchema");
 const bcrypt = require("bcryptjs");
+const authenticate = require("./middleware/authenticate");
 
 //get productsdata api
 router.get("/getproducts", async (req, res) => {
@@ -79,13 +80,22 @@ router.post("/login", async (req, res) => {
 
     if (userlogin) {
       const isMatch = await bcrypt.compare(password, userlogin.password);
-      console.log(isMatch);
+    //   console.log(isMatch);
 
+    const token = await userlogin.generatAuthtoken();
+
+
+    res.cookie("/Amazonweb",token,{
+        expires : new Date(Date.now() + 9000000),
+        httpOnly : true
+    })
+
+    console.log(token);
       if (!isMatch) {
         res.status(400).json({ error: "Password do not match" });
       }
       else{
-        res.status(201).json({error:"password match"});
+        res.status(201).json({userlogin});
       }
     }
   } catch (error) {
@@ -93,5 +103,33 @@ router.post("/login", async (req, res) => {
 
   }
 });
+
+//ading data in cart
+
+router.post("/addcart/:id",authenticate, async (req, res) => {
+
+  try {
+      // console.log("perfect 6");
+      const { id } = req.params;
+      const cart = await Products.findOne({ id: id });
+      console.log(cart + "cart milta hain");
+
+      const Usercontact = await User.findOne({ _id: req.userID });
+      console.log(Usercontact + "user milta hain");
+
+
+      if (Usercontact) {
+          const cartData = await Usercontact.addcartdata(cart);
+
+          await Usercontact.save();
+          console.log(cartData + " thse save wait kr");
+          console.log(Usercontact + "userjode save");
+          res.status(201).json(Usercontact);
+      }
+  } catch (error) {
+      console.log(error);
+  }
+});
+
 
 module.exports = router;

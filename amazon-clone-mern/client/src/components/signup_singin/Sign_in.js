@@ -1,23 +1,55 @@
 import React, { useState } from "react";
 import "./signup.css";
 import { NavLink } from "react-router-dom";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Sign_in = () => {
+  const [logdata, setData] = useState({
+    email: "",
+    password: "",
+  });
 
-const [logdata , setData] = useState({
-  email:"",
-  password:""
-});
+  const adddata = (e) => {
+    const { name, value } = e.target;
+    setData(() => {
+      return {
+        ...logdata,
+        [name]: value,
+      };
+    });
+  };
 
-const adddata = (e)=>{
-  const {name , value} = e.target;
-  setData(()=>{
-    return{
-      ...logdata,
-      [name]:value
+  const senddata = async (e) => {
+    e.preventDefault();
+
+    const { email, password } = logdata;
+
+    const res = await fetch("http://localhost:8005/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email,
+        password,
+      }),
+    });
+
+    const data = await res.json();
+    console.log(data);
+
+    if (res.status === 400 || !data) {
+      toast.warn("Invalid Details !", {
+        position: "top-center",
+      });
+    } else {
+      toast.success("User Valid!", {
+        position: "top-center",
+      });
+      setData({ ...logdata, email: "", password: "" });
     }
-  } )
-}
+  };
 
   return (
     <>
@@ -33,10 +65,13 @@ const adddata = (e)=>{
 
               <div className="form_data">
                 <label htmlFor="email">Email</label>
-                <input type="email" 
-                onChange={adddata}
-                value = {logdata.email}
-                name="email" id="email" />
+                <input
+                  type="email"
+                  onChange={adddata}
+                  value={logdata.email}
+                  name="email"
+                  id="email"
+                />
               </div>
               <div className="form_data">
                 <label htmlFor="password">Password</label>
@@ -50,7 +85,7 @@ const adddata = (e)=>{
                 />
               </div>
 
-              <button type="submit" className="signin_btn">
+              <button type="submit" onClick={senddata} className="signin_btn">
                 Continue
               </button>
             </form>
@@ -63,6 +98,7 @@ const adddata = (e)=>{
             </NavLink>
           </div>
         </div>
+        <ToastContainer />
       </section>
     </>
   );
