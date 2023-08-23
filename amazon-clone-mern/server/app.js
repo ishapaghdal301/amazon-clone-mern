@@ -20,5 +20,6 @@ app.use(router);
 const port = 8005;
 
 app.listen(port,()=>{
+    console.log("just testing ");
     console.log(`server is running on ${port}`);
 });
