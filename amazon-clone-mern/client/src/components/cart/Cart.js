@@ -31,6 +31,31 @@ const Cart = () => {
     getinddata();
   }, [id]);
 
+  const addtocart = async (id) => {
+    const checkers = await fetch(`/addcart/:${id}`, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        inddata,
+      }),
+      credentials: "include",
+    });
+
+    const data1 = await checkers.json();
+    console.log(data1 + "frontend data");
+
+    if(checkers.status === 401 || !data1){
+      console.log("User Invalid");
+      alert("User invalid");
+    }
+    else{
+      alert("Data added in your cart");
+    }
+  };
+
   return (
     <div className="cart_section">
       {inddata && Object.keys(inddata).length && (
@@ -38,7 +63,9 @@ const Cart = () => {
           <div className="left_cart">
             <img src={inddata.detailUrl} alt="cartimag" />
             <div className="cart_btn">
-              <button className="cart_btn1">Add to cart</button>
+              <button className="cart_btn1" onClick={()=>addtocart(inddata.id)}>
+                Add to cart
+              </button>
               <button className="cart_btn2">Buy Now</button>
             </div>
           </div>

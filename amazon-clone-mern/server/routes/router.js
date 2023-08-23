@@ -3,7 +3,7 @@ const router = new express.Router();
 const Products = require("../models/productSchema");
 const USER = require("../models/userSchema");
 const bcrypt = require("bcryptjs");
-const authenticate = require("./middleware/authenticate");
+const authenticate = require("../middleware/authenticate");
 
 //get productsdata api
 router.get("/getproducts", async (req, res) => {
@@ -85,7 +85,7 @@ router.post("/login", async (req, res) => {
     const token = await userlogin.generatAuthtoken();
 
 
-    res.cookie("/Amazonweb",token,{
+    res.cookie("Amazonweb",token,{
         expires : new Date(Date.now() + 9000000),
         httpOnly : true
     })
@@ -105,8 +105,7 @@ router.post("/login", async (req, res) => {
 });
 
 //ading data in cart
-
-router.post("/addcart/:id",authenticate, async (req, res) => {
+router.post("/addcart/:id", authenticate , async (req, res) => {
 
   try {
       // console.log("perfect 6");
@@ -114,7 +113,7 @@ router.post("/addcart/:id",authenticate, async (req, res) => {
       const cart = await Products.findOne({ id: id });
       console.log(cart + "cart milta hain");
 
-      const Usercontact = await User.findOne({ _id: req.userID });
+      const Usercontact = await USER.findOne({ _id: req.userID });
       console.log(Usercontact + "user milta hain");
 
 
@@ -122,12 +121,13 @@ router.post("/addcart/:id",authenticate, async (req, res) => {
           const cartData = await Usercontact.addcartdata(cart);
 
           await Usercontact.save();
-          console.log(cartData + " thse save wait kr");
-          console.log(Usercontact + "userjode save");
+          console.log(cartData );
+          console.log(Usercontact );
           res.status(201).json(Usercontact);
       }
   } catch (error) {
-      console.log(error);
+          res.status(201).json({error:"Invaled user"});
+          console.log(error);
   }
 });
 
